@@ -1,4 +1,4 @@
-package io.github.tpartyka
+package io.github.tpartyka.testapp
 
 import com.typesafe.config.ConfigFactory
 import net.ceedubs.ficus.Ficus

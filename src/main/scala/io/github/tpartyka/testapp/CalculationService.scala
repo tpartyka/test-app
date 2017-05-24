@@ -1,7 +1,7 @@
-package io.github.tpartyka
+package io.github.tpartyka.testapp
 
 import akka.http.scaladsl.server.{Directives, Route}
-import io.github.tpartyka.api.{CalculationRequest, CalculationResponse}
+import io.github.tpartyka.testapp.api.{CalculationRequest, CalculationResponse}
 
 trait CalculationService extends BaseService {
 

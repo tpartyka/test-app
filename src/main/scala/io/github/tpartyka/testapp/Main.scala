@@ -1,11 +1,11 @@
-package io.github.tpartyka
+package io.github.tpartyka.testapp
 
 import akka.actor.ActorSystem
 import akka.event.{Logging, LoggingAdapter}
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.server.{Directives, Route}
+import akka.http.scaladsl.server.Route
 import akka.stream.ActorMaterializer
-import de.heikoseeberger.akkahttpcirce.{CirceSupport, FailFastCirceSupport}
+import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport
 
 import scala.concurrent.ExecutionContext
 

@@ -1,4 +1,4 @@
-package io.github.tpartyka
+package io.github.tpartyka.testapp
 
 import akka.event.{LoggingAdapter, NoLogging}
 import akka.http.scaladsl.testkit.ScalatestRouteTest

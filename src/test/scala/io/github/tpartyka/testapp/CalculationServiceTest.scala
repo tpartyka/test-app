@@ -1,9 +1,9 @@
-package io.github.tpartyka
+package io.github.tpartyka.testapp
 
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.MalformedRequestContentRejection
 import akka.util.ByteString
-import io.github.tpartyka.api.CalculationResponse
+import io.github.tpartyka.testapp.api.CalculationResponse
 
 class CalculationServiceTest extends ServiceTestBase with CalculationService {
 
