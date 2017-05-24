@@ -5,7 +5,7 @@ import akka.event.{Logging, LoggingAdapter}
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.{Directives, Route}
 import akka.stream.ActorMaterializer
-import de.heikoseeberger.akkahttpcirce.CirceSupport
+import de.heikoseeberger.akkahttpcirce.{CirceSupport, FailFastCirceSupport}
 
 import scala.concurrent.ExecutionContext
 
@@ -14,11 +14,11 @@ trait BaseComponent extends Config {
   protected implicit def executor: ExecutionContext
 }
 
-trait BaseService extends BaseComponent with CirceSupport {
+trait BaseService extends BaseComponent with FailFastCirceSupport {
   protected def routes: Route
 }
 
-object Main extends App with Config with Services {
+object Main extends App with Config with CalculationService {
   implicit val system       = ActorSystem()
   implicit val materializer = ActorMaterializer()
 
@@ -28,17 +28,3 @@ object Main extends App with Config with Services {
   Http().bindAndHandle(routes, httpConfig.interface, httpConfig.port)
 }
 
-trait Services extends StatusService {
-  import Directives._
-
-  private val apiVersion = "v1"
-  private val allRoutes = Map(
-    "status" -> super[StatusService].routes
-  )
-
-  protected override val routes: Route = pathPrefix(apiVersion) {
-    allRoutes.map {
-      case (k, v) => path(k)(v)
-    } reduce (_ ~ _)
-  }
-}
