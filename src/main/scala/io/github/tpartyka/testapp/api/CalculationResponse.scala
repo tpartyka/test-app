@@ -3,4 +3,10 @@ package io.github.tpartyka.testapp.api
 /**
   * Created by tpartyka on 24.05.2017.
   */
-case class CalculationResponse(result: Int)
+
+sealed class CalculationResponse
+
+case class CalculationSuccess(result: Double) extends CalculationResponse
+
+case class CalculationFailed(reason: String, returnCode: Int) extends CalculationResponse
+

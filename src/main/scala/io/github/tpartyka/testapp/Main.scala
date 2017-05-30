@@ -18,9 +18,13 @@ trait BaseService extends BaseComponent with FailFastCirceSupport {
   protected def routes: Route
 }
 
-object Main extends App with Config with CalculationService {
+object AkkaEnv {
   implicit val system       = ActorSystem()
   implicit val materializer = ActorMaterializer()
+}
+
+object Main extends App with Config with CalculationService {
+  import AkkaEnv._
 
   override protected def log      = Logging(system, "service")
   override protected def executor = system.dispatcher
