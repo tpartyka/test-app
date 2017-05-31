@@ -1,10 +1,10 @@
 package io.github.tpartyka.testapp
 
 import akka.actor.Actor
-import akka.event.{Logging, LoggingAdapter}
-import akka.actor.SupervisorStrategy.Stop
-import io.github.tpartyka.testapp.api._
+import akka.event.Logging
 import io.github.tpartyka.testapp.AkkaEnv.system
+import io.github.tpartyka.testapp.api._
+
 import scala.util.{Failure, Success, Try}
 
 /**

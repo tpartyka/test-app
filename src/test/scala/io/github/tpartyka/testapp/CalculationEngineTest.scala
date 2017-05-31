@@ -21,7 +21,7 @@ class CalculationEngineTest extends FlatSpec with Matchers {
 
   "Malformed Expression 6 * (3+2)) + (7 + 5 - 4)" should "be detected in validation" in {
     val request = "6 * (3+2)) + (7 + 5 - 4)"
-    CalculationEngine.validate(request) should matchPattern { case Failure(_) => }
+    CalculationEngine.validate(request) should matchPattern { case Failure(_: IllegalArgumentException) => }
   }
 
   "Expression 6 * (3+2)) + (7 + 5 - 4) with division by 0" should "be detected in computation" in {

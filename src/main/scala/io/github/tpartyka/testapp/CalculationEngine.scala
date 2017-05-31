@@ -1,17 +1,18 @@
 package io.github.tpartyka.testapp
 
 
+import akka.event.Logging
+import io.github.tpartyka.testapp.AkkaEnv.system
+
 import scala.util.Try
 import scala.util.parsing.combinator.JavaTokenParsers
-import io.github.tpartyka.testapp.AkkaEnv.system
-import akka.event.{Logging, LoggingAdapter}
 
 /**
   * Created by tpartyka on 25.05.2017.
   */
 sealed class CalculationEngine extends JavaTokenParsers {
 
-  type FunctionMapping = PartialFunction[String, (Double, Double) => Double]
+  type FunctionMapping = PartialFunction[String, (Float, Float) => Float]
 
   val operationMapping: FunctionMapping = {
     case "+" => (x, y) => x + y
@@ -24,9 +25,10 @@ sealed class CalculationEngine extends JavaTokenParsers {
   def parseTree(stringExpression: String): Tree = {
     parseAll(expr, stringExpression).getOrElse(throw new IllegalArgumentException)
   }
+
   private lazy val factor = "(" ~> expr <~ ")" | numeric
 
-  private lazy val numeric = floatingPointNumber ^^ { t => Leaf(t.toDouble) }
+  private lazy val numeric = floatingPointNumber ^^ { t => Leaf(t.toFloat) }
 
   private lazy val expr: Parser[Tree] = term ~ rep("[+-]".r ~ term) ^^ {
     case t ~ ts => ts.foldLeft(t) {
@@ -39,7 +41,6 @@ sealed class CalculationEngine extends JavaTokenParsers {
       case (t1, op ~ t2) => Node(operationMapping(op), t1, t2)
     }
   }
-
 }
 
 object CalculationEngine {
@@ -54,10 +55,10 @@ sealed abstract class Tree {
 
   val log = Logging(system, "treeEvaluation")
 
-  def evaluate: Double = evaluate(this)
+  def evaluate: Float = evaluate(this)
 
-  private def evaluate(root: Tree): Double = root match {
-    case Leaf(value: Double) =>
+  private def evaluate(root: Tree): Float = root match {
+    case Leaf(value) =>
       log.debug(s"Returning $value")
       value
     case Node(op, leafs@_*) if leafs.forall(_.isInstanceOf[Leaf]) =>
@@ -70,6 +71,6 @@ sealed abstract class Tree {
 
 }
 
-case class Node(operation: (Double, Double) => Double, children: Tree*) extends Tree
+case class Node(operation: (Float, Float) => Float, children: Tree*) extends Tree
 
-case class Leaf(value: Double) extends Tree
+case class Leaf(value: Float) extends Tree

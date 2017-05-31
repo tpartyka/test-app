@@ -26,9 +26,9 @@ class CalculationServiceTest extends ServiceTestBase with CalculationService {
   "CalculationService" when {
     "postRequest contains 0" should {
       "return 0" in {
-        PostRequest.withBody("\"0\"") ~> routes ~> check {
+        PostRequest.withBody("\"2 + 2\"") ~> routes ~> check {
           status should be(StatusCodes.OK)
-          responseAs[CalculationSuccess].result shouldEqual 0
+          responseAs[CalculationSuccess].result shouldEqual 4
         }
       }
     }

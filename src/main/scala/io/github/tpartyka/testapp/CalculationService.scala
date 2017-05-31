@@ -23,7 +23,7 @@ trait CalculationService extends BaseService {
         entity(as[CalculationRequest]) { request: CalculationRequest =>
             onComplete(system.actorOf(Props[CalculationActor]).ask(request).mapTo[CalculationResponse]) {
               case Success(response)=> response match {
-                case c: CalculationFailed => complete(c.returnCode, c.reason)
+                case CalculationFailed(reason, returnCode) => complete(returnCode, reason)
                 case s: CalculationSuccess => complete(s)
               }
               case Failure(ex) => complete(500, ex.getMessage)
