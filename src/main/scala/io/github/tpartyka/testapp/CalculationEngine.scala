@@ -12,7 +12,7 @@ import scala.util.parsing.combinator.JavaTokenParsers
   */
 sealed class CalculationEngine extends JavaTokenParsers {
 
-  type FunctionMapping = PartialFunction[String, (Float, Float) => Float]
+  type FunctionMapping = PartialFunction[String, (Double, Double) => Double]
 
   val operationMapping: FunctionMapping = {
     case "+" => (x, y) => x + y
@@ -28,7 +28,7 @@ sealed class CalculationEngine extends JavaTokenParsers {
 
   private lazy val factor = "(" ~> expr <~ ")" | numeric
 
-  private lazy val numeric = floatingPointNumber ^^ { t => Leaf(t.toFloat) }
+  private lazy val numeric = floatingPointNumber ^^ { t => Leaf(t.toDouble) }
 
   private lazy val expr: Parser[Tree] = term ~ rep("[+-]".r ~ term) ^^ {
     case t ~ ts => ts.foldLeft(t) {
@@ -55,9 +55,15 @@ sealed abstract class Tree {
 
   val log = Logging(system, "treeEvaluation")
 
-  def evaluate: Float = evaluate(this)
+  def evaluate: Double = {
+    val result = evaluate(this)
+    if(result.isInfinity || result.isInfinity){
+      throw new ArithmeticException(s"Result isNaN: ${result.isNaN}, isInfinity: ${result.isInfinity}")
+    }
+    result
+  }
 
-  private def evaluate(root: Tree): Float = root match {
+  private def evaluate(root: Tree): Double = root match {
     case Leaf(value) =>
       log.debug(s"Returning $value")
       value
@@ -71,6 +77,6 @@ sealed abstract class Tree {
 
 }
 
-case class Node(operation: (Float, Float) => Float, children: Tree*) extends Tree
+case class Node(operation: (Double, Double) => Double, children: Tree*) extends Tree
 
-case class Leaf(value: Float) extends Tree
+case class Leaf(value: Double) extends Tree

@@ -6,7 +6,7 @@ package io.github.tpartyka.testapp.api
 
 sealed class CalculationResponse
 
-case class CalculationSuccess(result: Float) extends CalculationResponse
+case class CalculationSuccess(result: Double) extends CalculationResponse
 
 case class CalculationFailed(reason: String, returnCode: Int) extends CalculationResponse
 

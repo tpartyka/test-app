@@ -32,8 +32,10 @@ class CalculationActor extends Actor {
 
   def computeTree(tree: Tree): Unit = {
     Try(tree.evaluate) match {
-      case Success(result) => respondSender(CalculationSuccess(result))
-      case Failure(exception) => respondSender(CalculationFailed(s"Exception during calculation. [${exception.getMessage}]", 500))
+      case Success(result) =>
+        respondSender(CalculationSuccess(result))
+      case Failure(exception) =>
+        respondSender(CalculationFailed(s"Exception during calculation. [${exception.getMessage}]", 500))
     }
   }
 
