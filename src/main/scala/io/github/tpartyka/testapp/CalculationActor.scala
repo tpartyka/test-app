@@ -1,15 +1,27 @@
 package io.github.tpartyka.testapp
 
 import akka.actor.Actor
+import akka.event.{Logging, LoggingAdapter}
 import akka.actor.SupervisorStrategy.Stop
-import io.github.tpartyka.testapp.api.{CalculationFailed, CalculationRequest, CalculationResponse, CalculationSuccess}
-
+import io.github.tpartyka.testapp.api._
+import io.github.tpartyka.testapp.AkkaEnv.system
 import scala.util.{Failure, Success, Try}
 
 /**
   * Created by tpartyka on 30.05.2017.
   */
 class CalculationActor extends Actor {
+
+  val log = Logging(system, "treeEvaluation")
+
+  override def preStart(): Unit = {
+    log.info("Starting calculation actor.")
+  }
+
+  override def postStop(): Unit = {
+    log.info("Calculation actor stopped.")
+  }
+
   override def receive: Receive = {
     case CalculationRequest(expression) =>
       CalculationEngine.validate(expression) match {
@@ -27,7 +39,7 @@ class CalculationActor extends Actor {
 
   def respondSender(resp: CalculationResponse): Unit = {
     sender ! resp
-    self ! Stop
+    context.stop(self)
   }
 
 }

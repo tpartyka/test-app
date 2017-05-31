@@ -3,7 +3,8 @@ package io.github.tpartyka.testapp
 
 import scala.util.Try
 import scala.util.parsing.combinator.JavaTokenParsers
-
+import io.github.tpartyka.testapp.AkkaEnv.system
+import akka.event.{Logging, LoggingAdapter}
 
 /**
   * Created by tpartyka on 25.05.2017.
@@ -51,18 +52,20 @@ object CalculationEngine {
 
 sealed abstract class Tree {
 
+  val log = Logging(system, "treeEvaluation")
+
   def evaluate: Double = evaluate(this)
 
   private def evaluate(root: Tree): Double = root match {
     case Leaf(value: Double) =>
-      println(s"Returning $value")
+      log.debug(s"Returning $value")
       value
     case Node(op, leafs@_*) if leafs.forall(_.isInstanceOf[Leaf]) =>
-      println(s"Computing $op, args: $leafs\n")
+      log.debug(s"Computing $op, args: $leafs\n")
       leafs.map(evaluate).reduce(op)
     case Node(op, nodes@_*) =>
-      println(s"Computing $op, args: $nodes\n")
-      nodes.par.map(evaluate).seq.reduce(op)
+      log.debug(s"Computing $op, args: $nodes\n")
+      nodes.par.map(evaluate).reduce(op)
   }
 
 }
