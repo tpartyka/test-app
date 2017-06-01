@@ -53,7 +53,7 @@ sealed abstract class Tree {
 
   def evaluate: Double = {
     val result = evaluate(this)
-    if (result.isInfinity || result.isInfinity) {
+    if (result.isNaN || result.isInfinity) {
       throw new ArithmeticException(s"Result isNaN: ${result.isNaN}, isInfinity: ${result.isInfinity}")
     }
     result
