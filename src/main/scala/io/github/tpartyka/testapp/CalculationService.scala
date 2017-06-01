@@ -1,14 +1,14 @@
 package io.github.tpartyka.testapp
 
-import akka.http.scaladsl.server.{Directives, Route}
-import AkkaEnv._
 import akka.actor.Props
+import akka.http.scaladsl.marshalling.ToResponseMarshaller
+import akka.http.scaladsl.server.{Directives, Route}
 import akka.pattern.ask
 import akka.util.Timeout
-import io.github.tpartyka.testapp.api.{CalculationFailed, CalculationRequest, CalculationResponse, CalculationSuccess}
+import io.github.tpartyka.testapp.AkkaEnv._
+import io.github.tpartyka.testapp.api.CalculationRequest
 
 import scala.concurrent.duration._
-import scala.util.{Failure, Success}
 
 trait CalculationService extends BaseService {
 
@@ -20,14 +20,8 @@ trait CalculationService extends BaseService {
   override protected def routes: Route =
     path("evaluate") {
       post {
-        entity(as[CalculationRequest]) { request: CalculationRequest =>
-            onComplete(system.actorOf(Props[CalculationActor]).ask(request).mapTo[CalculationResponse]) {
-              case Success(response)=> response match {
-                case CalculationFailed(reason, returnCode) => complete(returnCode, reason)
-                case s: CalculationSuccess => complete(s)
-              }
-              case Failure(ex) => complete(500, ex.getMessage)
-            }
+        completeWith(implicitly[ToResponseMarshaller[CalculationRequest]]) { request =>
+          system.actorOf(Props[CalculationActor]).ask(request)
         }
       }
     }

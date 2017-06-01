@@ -10,7 +10,7 @@ import scala.util.parsing.combinator.JavaTokenParsers
 /**
   * Created by tpartyka on 25.05.2017.
   */
-sealed class CalculationEngine extends JavaTokenParsers {
+object CalculationEngine extends JavaTokenParsers {
 
   type FunctionMapping = PartialFunction[String, (Double, Double) => Double]
 
@@ -20,10 +20,6 @@ sealed class CalculationEngine extends JavaTokenParsers {
     case "*" => (x, y) => x * y
     case "/" => (x, y) => x / y
     case _ => throw new UnsupportedOperationException
-  }
-
-  def parseTree(stringExpression: String): Tree = {
-    parseAll(expr, stringExpression).getOrElse(throw new IllegalArgumentException)
   }
 
   private lazy val factor = "(" ~> expr <~ ")" | numeric
@@ -41,12 +37,9 @@ sealed class CalculationEngine extends JavaTokenParsers {
       case (t1, op ~ t2) => Node(operationMapping(op), t1, t2)
     }
   }
-}
-
-object CalculationEngine {
 
   def validate(request: String): Try[Tree] = Try {
-    new CalculationEngine().parseTree(request)
+    parseAll(expr, request).getOrElse(throw new IllegalArgumentException)
   }
 
 }
@@ -57,7 +50,7 @@ sealed abstract class Tree {
 
   def evaluate: Double = {
     val result = evaluate(this)
-    if(result.isInfinity || result.isInfinity){
+    if (result.isInfinity || result.isInfinity) {
       throw new ArithmeticException(s"Result isNaN: ${result.isNaN}, isInfinity: ${result.isInfinity}")
     }
     result
@@ -68,10 +61,10 @@ sealed abstract class Tree {
       log.debug(s"Returning $value")
       value
     case Node(op, leafs@_*) if leafs.forall(_.isInstanceOf[Leaf]) =>
-      log.debug(s"Computing $op, args: $leafs\n")
+      log.debug(s"Computing leafs-only node, args: $leafs\n")
       leafs.map(evaluate).reduce(op)
     case Node(op, nodes@_*) =>
-      log.debug(s"Computing $op, args: $nodes\n")
+      log.debug(s"Computing node, args: $nodes\n")
       nodes.par.map(evaluate).reduce(op)
   }
 
