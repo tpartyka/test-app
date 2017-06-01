@@ -1,8 +1,7 @@
 package io.github.tpartyka.testapp
 
 import akka.actor.Props
-import akka.http.scaladsl.marshalling.ToResponseMarshaller
-import akka.http.scaladsl.server.{Directives, Route}
+import akka.http.scaladsl.server.{Directives, Route, StandardRoute}
 import akka.pattern.ask
 import akka.util.Timeout
 import io.github.tpartyka.testapp.AkkaEnv._
@@ -20,8 +19,12 @@ trait CalculationService extends BaseService {
   override protected def routes: Route =
     path("evaluate") {
       post {
-        completeWith(implicitly[ToResponseMarshaller[CalculationRequest]]) { request =>
-          system.actorOf(Props[CalculationActor]).ask(request)
+        entity(as[CalculationRequest]) { request: CalculationRequest =>
+          onComplete(
+            system.actorOf(Props[CalculationActor]).ask(request).mapTo[StandardRoute]
+          ) {
+            response => response.fold(failWith, route => route)
+          }
         }
       }
     }

@@ -24,8 +24,8 @@ class CalculationEngineTest extends FlatSpec with Matchers {
     CalculationEngine.validate(request) should matchPattern { case Failure(_: IllegalArgumentException) => }
   }
 
-  "Expression 6 * (3+2)) + (7 + 5 - 4) with division by 0" should "be detected in computation" in {
+  "Expression 6 * (3+2) + (7 + 5 - 12) with division by 0" should "be detected in computation" in {
     val request = "6 * (3+2) / (7 + 5 - 12)"
-    CalculationEngine.validate(request).map(_.evaluate) should matchPattern { case Failure(_) => }
+    CalculationEngine.validate(request).map(_.evaluate) should matchPattern { case Failure(_: ArithmeticException) => }
   }
 }

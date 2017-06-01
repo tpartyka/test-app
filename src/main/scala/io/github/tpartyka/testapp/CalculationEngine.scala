@@ -39,7 +39,10 @@ object CalculationEngine extends JavaTokenParsers {
   }
 
   def validate(request: String): Try[Tree] = Try {
-    parseAll(expr, request).getOrElse(throw new IllegalArgumentException)
+    parseAll(expr, request) match {
+      case Success(tree, _) => tree
+      case NoSuccess(str, input) => throw new IllegalArgumentException(s"Invalid input: $str on pos: ${input.pos}")
+    }
   }
 
 }
@@ -60,9 +63,9 @@ sealed abstract class Tree {
     case Leaf(value) =>
       log.debug(s"Returning $value")
       value
-    case Node(op, leafs@_*) if leafs.forall(_.isInstanceOf[Leaf]) =>
-      log.debug(s"Computing leafs-only node, args: $leafs\n")
-      leafs.map(evaluate).reduce(op)
+    case Node(op, leaves@_*) if leaves.forall(_.isInstanceOf[Leaf]) =>
+      log.debug(s"Computing leafs-only node, args: $leaves\n")
+      leaves.map(evaluate).reduce(op)
     case Node(op, nodes@_*) =>
       log.debug(s"Computing node, args: $nodes\n")
       nodes.par.map(evaluate).reduce(op)

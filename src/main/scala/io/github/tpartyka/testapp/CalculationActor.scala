@@ -3,6 +3,7 @@ package io.github.tpartyka.testapp
 import akka.actor.Actor
 import akka.event.Logging
 import akka.http.scaladsl.server._
+import akka.http.scaladsl.model.StatusCodes._
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport
 import io.github.tpartyka.testapp.AkkaEnv.system
 import io.github.tpartyka.testapp.api._
@@ -17,7 +18,7 @@ class CalculationActor extends Actor with FailFastCirceSupport {
   import Directives._
   import io.circe.generic.auto._
 
-  val log = Logging(system, "treeEvaluation")
+  val log = Logging(system, "calculationActor")
 
   override def preStart(): Unit = {
     log.info("Starting calculation actor.")
@@ -31,7 +32,7 @@ class CalculationActor extends Actor with FailFastCirceSupport {
     case CalculationRequest(expression) =>
       log.info(s"Start processing $expression.")
       CalculationEngine.validate(expression).fold(
-        ex => sender ! failWith(ex),
+        exception => sender ! complete(BadRequest, CalculationFailed(exception.getMessage)),
         computeTree
       )
       context.stop(self)
@@ -39,7 +40,7 @@ class CalculationActor extends Actor with FailFastCirceSupport {
 
   def computeTree(tree: Tree): Unit = {
     Try(tree.evaluate).fold(
-      exception => sender ! failWith(exception),
+      exception => sender ! complete(BadRequest, CalculationFailed(exception.getMessage)),
       result => sender ! complete(CalculationSuccess(result))
     )
   }

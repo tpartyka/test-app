@@ -1,9 +1,8 @@
 package io.github.tpartyka.testapp
 
 import akka.http.scaladsl.model._
-import akka.http.scaladsl.server.MalformedRequestContentRejection
 import akka.util.ByteString
-import io.github.tpartyka.testapp.api.CalculationSuccess
+import io.github.tpartyka.testapp.api.{CalculationFailed, CalculationSuccess}
 
 class CalculationServiceTest extends ServiceTestBase with CalculationService {
 
@@ -17,7 +16,7 @@ class CalculationServiceTest extends ServiceTestBase with CalculationService {
         entity = HttpEntity(MediaTypes.`application/json`, ByteString(
           s"""
              |{
-             |    "expression": $request
+             |    "expression": "$request"
              |}
         """.stripMargin)))
     }
@@ -26,19 +25,27 @@ class CalculationServiceTest extends ServiceTestBase with CalculationService {
   "CalculationService" when {
     "postRequest contains 0" should {
       "return 0" in {
-        PostRequest.withBody("\"2 + 2\"") ~> routes ~> check {
+        PostRequest.withBody("2 + 2") ~> routes ~> check {
           status should be(StatusCodes.OK)
           responseAs[CalculationSuccess].result shouldEqual 4
         }
       }
-    }
-    "postRequest is not JSON string" should {
-      "return error message" in {
-        PostRequest.withBody("1") ~> routes ~> check {
-          rejection should matchPattern { case MalformedRequestContentRejection(_, _) => }
+      "postRequest contains division by 0" should {
+        "return error message" in {
+          PostRequest.withBody("1/0") ~> routes ~> check {
+            status should be(StatusCodes.BadRequest)
+            responseAs[CalculationFailed].error should include("isInfinity: true")
+          }
+        }
+      }
+      "postRequest with unexpected char" should {
+        "return error message" in {
+          PostRequest.withBody("1&5") ~> routes ~> check {
+            status should be(StatusCodes.BadRequest)
+            responseAs[CalculationFailed].error should include("Invalid input:")
+          }
         }
       }
     }
   }
-
 }

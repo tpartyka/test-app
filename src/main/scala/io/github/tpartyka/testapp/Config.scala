@@ -13,5 +13,3 @@ trait Config {
   private val config                   = ConfigFactory.load()
   protected val httpConfig: HttpConfig = config.as[HttpConfig]("http")
 }
-
-object Config extends Config
